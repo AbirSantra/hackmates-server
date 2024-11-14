@@ -15,7 +15,6 @@ export const DRIZZLE = Symbol('drizzle-connection');
         const databaseURL = configService.get<string>('DATABASE_URL');
         const pool = new Pool({
           connectionString: databaseURL,
-          ssl: true,
         });
         return drizzle(pool, {
           schema,
