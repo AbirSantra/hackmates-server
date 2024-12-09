@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -24,7 +25,7 @@ export class UsersService {
     });
 
     if (existingUser) {
-      throw new BadRequestException('User with this email already exists');
+      throw new ConflictException('User with this email already exists');
     }
 
     // Hash password
@@ -37,7 +38,7 @@ export class UsersService {
 
     // Create user
     try {
-      const newUser = await this.db
+      const [newUser] = await this.db
         .insert(user)
         .values({
           email: email,
