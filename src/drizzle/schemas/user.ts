@@ -10,7 +10,7 @@ import {
 export const user = pgTable('users', {
   id: serial('id').primaryKey(),
   username: varchar('username', { length: 255 }),
-  name: varchar('name', { length: 255 }).notNull(),
+  name: varchar('name', { length: 255 }).default('Anonymous User'),
   email: varchar('email', { length: 255 }).notNull().unique(),
   password: varchar('password', { length: 255 }).notNull(),
   isVerified: boolean('isVerified').notNull().default(false),

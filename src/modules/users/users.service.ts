@@ -16,14 +16,12 @@ export class UsersService {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
 
   async createUser(createUserDto: CreateUserDto) {
-    const { email, name, password } = createUserDto;
+    const { email, password } = createUserDto;
 
     // Find if user with email already exists
     const existingUser = await this.db.query.user.findFirst({
       where: eq(user.email, email),
     });
-
-    console.log('Existing user: ', existingUser);
 
     if (existingUser) {
       throw new BadRequestException('User with this email already exists');
@@ -43,7 +41,6 @@ export class UsersService {
         .insert(user)
         .values({
           email: email,
-          name: name,
           password: hashedPassword,
         })
         .returning({
