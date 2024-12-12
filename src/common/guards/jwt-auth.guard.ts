@@ -2,14 +2,14 @@ import {
   CanActivate,
   ExecutionContext,
   HttpException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { eq } from 'drizzle-orm';
 import { Request } from 'express';
-import { Observable } from 'rxjs';
+import { DRIZZLE } from 'src/drizzle/drizzle.module';
 import { user } from 'src/drizzle/schemas';
 import { DrizzleDB } from 'src/drizzle/types/drizzle';
 
@@ -24,8 +24,7 @@ export interface JwtPayload {
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly db: DrizzleDB,
+    @Inject(DRIZZLE) private readonly db: DrizzleDB,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

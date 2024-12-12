@@ -9,5 +9,6 @@ import { TokenService } from './token.service';
   imports: [DrizzleModule],
   providers: [AuthService, PasswordService, TokenService],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}
