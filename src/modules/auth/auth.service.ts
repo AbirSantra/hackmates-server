@@ -1,4 +1,9 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { DRIZZLE } from 'src/drizzle/drizzle.module';
 import { DrizzleDB } from 'src/drizzle/types/drizzle';
 import { PasswordService } from './password.service';
@@ -6,6 +11,7 @@ import { TokenService } from './token.service';
 import { RegisterUserDTO } from './dto/register-user.dto';
 import { eq, is } from 'drizzle-orm';
 import { user } from 'src/drizzle/schemas';
+import { LoginUserDTO } from './dto/login-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -62,6 +68,55 @@ export class AuthService {
       user: newUser,
       accessToken: accessToken,
       refreshToken: refreshToken,
+    };
+  }
+
+  async loginUser(loginData: LoginUserDTO) {
+    const { email, password } = loginData;
+
+    // Find user by email
+    const existingUser = await this.db.query.user.findFirst({
+      where: eq(user.email, email),
+    });
+
+    if (!existingUser) {
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    // Compare passwords
+    const isPasswordValid = await this.passwordService.comparePassword(
+      password,
+      existingUser.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    // Generate tokens
+    const accessToken = this.tokenService.createAccessToken({
+      id: existingUser.id,
+      email: existingUser.email,
+    });
+
+    const refreshToken = this.tokenService.createAccessToken({
+      id: existingUser.id,
+    });
+
+    return {
+      user: {
+        id: existingUser.id,
+        email: existingUser.email,
+        name: existingUser.name,
+        username: existingUser.username,
+        isVerified: existingUser.isVerified,
+        isActive: existingUser.isActive,
+        createdAt: existingUser.createdAt,
+        bio: existingUser.bio,
+        avatar: existingUser.avatar,
+      },
+      accessToken,
+      refreshToken,
     };
   }
 }

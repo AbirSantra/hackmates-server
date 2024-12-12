@@ -7,4 +7,11 @@ export class PasswordService {
     const SALT_ROUNDS = 10;
     return bycrpt.hash(password, SALT_ROUNDS);
   }
+
+  async comparePassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    return bycrpt.compare(password, hashedPassword);
+  }
 }

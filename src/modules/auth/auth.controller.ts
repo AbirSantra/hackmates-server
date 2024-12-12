@@ -12,6 +12,7 @@ import { ZodValidationPipe } from 'src/common/pipes/zodValidation.pipe';
 import { RegisterUserDTO, RegisterUserSchema } from './dto/register-user.dto';
 import { Response } from 'express';
 import { ZodValidate } from 'src/common/decorators/zod-validation.decorator';
+import { LoginUserDTO, LoginUserSchema } from './dto/login-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -27,6 +28,28 @@ export class AuthController {
     // Register user and get tokens
     const { user, accessToken, refreshToken } =
       await this.authService.registerUser(body);
+
+    // Set refresh token in HTTP-only secure cookie
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return { user, accessToken };
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ZodValidate(LoginUserSchema)
+  async login(
+    @Body() body: LoginUserDTO,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    // Login user and get tokens
+    const { user, accessToken, refreshToken } =
+      await this.authService.loginUser(body);
 
     // Set refresh token in HTTP-only secure cookie
     response.cookie('refreshToken', refreshToken, {
